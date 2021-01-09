@@ -1,5 +1,5 @@
 # WikiTools
-Tools for building Wikipedia literacy.
+Webapp tools for building Wikipedia literacy. Built with Flask, and styled according to the template for my personal website.
 
 ## Tools:
 
