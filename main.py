@@ -236,6 +236,7 @@ def plot_wiki_editors():
         count = 0
         color_count = 0
         colors = ['blue', 'green', 'red', 'indigo', 'goldenrod', 'turquoise', 'olive', 'sienna', 'fuchsia', 'lavender']
+        plt.clf()
 
         for entry in user_edits_list:
             print(entry)
@@ -243,6 +244,7 @@ def plot_wiki_editors():
             timestamps.reverse()
 
             dates = [datetime.strptime(d, '%Y-%m-%dT%H:%M:%SZ') for d in timestamps]
+
             plt.plot()
 
             if count >= user_edits_list_len - 10:
@@ -254,6 +256,7 @@ def plot_wiki_editors():
             count += 1
 
         handles, labels = plt.gca().get_legend_handles_labels()
+        print(handles, labels)
         plt.legend(handles[::-1], labels[::-1], loc='upper left', ncol=1, bbox_to_anchor=(1.05, 1), borderaxespad=0.)
 
         plt.tight_layout()
