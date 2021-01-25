@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
 from base64 import b64encode
+from matplotlib import rcParams
+rcParams['font.family'] = 'monospace'
+rcParams['font.monospace'] = ["Lucida Console", "Courier New"]
+rcParams['axes.linewidth'] = .75
+plt.style.use('bmh')
 
 
 # define a function that will get all of the revision timestamps for a given article
@@ -196,7 +201,6 @@ def plot_wiki_revisions():
             d = datetime.strptime(stamp, '%Y-%m-%dT%H:%M:%SZ')
             dates.append(d)
 
-        plt.style.use('bmh')
         plt.clf()
         plt.plot()
         plt.plot_date(dates, range(len(dates)), color="green")
@@ -292,12 +296,14 @@ def plot_wiki_editors_JINJA():
         user_edits_list_len = len(user_edits_list)
         count = 0
         color_count = 0
-        colors = [ '#320E3B', '#FF499E', '#A480CF', '#1E2EDE', '#47A8BD',  '#53FF45',  '#EFCA08',  '#FB6107', '#EC0B43', '#89043D']
+        colors = ['#348ABD', '#A60628', '#7A68A6', '#467821', '#D55E00', '#CC79A7', '#56B4E9', '#009E73', '#F0E442', '#0072B2']
+        #colors = [ '#320E3B', '#FF499E', '#A480CF', '#1E2EDE', '#47A8BD',  '#53FF45',  '#EFCA08',  '#FB6107', '#EC0B43', '#89043D']
         plt.clf()
 
-        plt.xlabel('Time')
-        plt.ylabel('Revisions count')
-        plt.xticks(rotation=60)
+        plt.xlabel('Time', weight='bold', fontsize=16)
+        plt.ylabel('Revisions count', weight='bold', fontsize=16)
+        plt.xticks(rotation=60, font="Courier New", color="#000000", weight='bold')
+        plt.yticks(font="Courier New", color="#000000", weight='bold')
         user_colors = []
 
         for entry in user_edits_list:
@@ -309,11 +315,11 @@ def plot_wiki_editors_JINJA():
             plt.plot()
 
             if count >= user_edits_list_len - 10:
-                plt.plot_date(dates, range(len(dates)), linestyle='solid', marker='.', markersize=1.25, label=entry[0], color=colors[color_count])
+                plt.plot_date(dates, range(len(dates)), linestyle='solid', linewidth=1, marker='o', markersize=3, label=entry[0], color=colors[color_count])
                 user_colors.append((entry[0], colors[color_count]))
                 color_count += 1
             else:
-                plt.plot_date(dates, range(len(dates)), linestyle='solid', marker='.', markersize=1.25, label='_nolegend_', color='#D8DDDE')
+                plt.plot_date(dates, range(len(dates)), linestyle='solid', linewidth=1, marker='o', markersize=3, label='_nolegend_', color='#D8DDDE')
 
             count += 1
 
@@ -321,7 +327,9 @@ def plot_wiki_editors_JINJA():
         #plt.legend(handles[::-1], labels[::-1], loc='upper left', ncol=1, bbox_to_anchor=(1.05, 1), borderaxespad=0.)
 
 
+
         plt.tight_layout()
+        plt.tick_params(color="#000000")
         #plt.gcf().subplots_adjust(top=.8)
 
 
@@ -334,9 +342,9 @@ def plot_wiki_editors_JINJA():
 
         print(user_colors)
 
-        return render_template('PlotWikiEditors_JINJA.html', image=pngImageB64String, user_colors=reversed(user_colors), title=title)
+        return render_template('PlotWikiEditors_JINJA.html', image=pngImageB64String, user_colors=reversed(user_colors), title=title, page_title=page_title)
     except:
-        return render_template('PlotWikiEditors_JINJA.html', image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', user_colors=reversed(user_colors), title=title)
+        return render_template('PlotWikiEditors_JINJA.html', image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', user_colors=reversed(user_colors), title=title, page_title=page_title)
 
 
 if __name__ == "__main__":

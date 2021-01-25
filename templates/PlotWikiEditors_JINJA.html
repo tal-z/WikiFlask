@@ -7,21 +7,74 @@
         -Legend
     */
 
+        * {
+            font-family:  "Courier New", "Lucida Console", monospace;
+            box-sizing: border-box;
+        }
+
+        html,body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .sidebar {
+            float: left;
+            background: #eeeeee;
+            height: 100vh;
+            width: 20vw;
+            overflow: visible;
+            border-right: 1px solid;
+            border-color: #bcbcbc;
+        }
+
+        .sidebar-header {
+            padding-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .sidebar-btn {
+            text-align: center;
+        }
+
+        /* Content contains everything but the sidebar and script*/
+
+        .content {
+            float: left;
+            width: 80%;
+        }
+
         .figure-wrapper {
             display: inline-block;
+            margin: 10px;
+            padding: 10px;
+            width: 75%;
         }
 
         .title {
-             text-align: center;
-             font-family: "Lucida Console", "Courier New", monospace;
-             font-size: 20px;
-             padding-left: 45px;
+             font-size: 30px;
+             width: 100%;
+             font-weight: bold;
+             padding-left: 85px;
 
+        }
 
+        .chart-legend-wrapper {
+            white-space: nowrap;
         }
 
         #chart{
             display: inline-block;
+            float: left;
+        }
+
+        img {
+            height: 70vh;
         }
 
 
@@ -51,15 +104,23 @@
     */
 
     .legend {
+        position: sticky;
         padding: 3px 3px 3px 3px;
-        margin-top: 14px;
+        margin-top: 16px;
         display: inline-block;
         vertical-align:top;
-        background: white;
+        background: #eeeeee;
         border-style: solid;
-        border-color: black;
+        border-color: #bcbcbc;
         border-width: 1px;
+        min-width: 100px;
     }
+
+    form {
+        margin: 10px;
+        padding-left: 85px;
+    }
+
 
     </style>
 <html lang="en">
@@ -69,8 +130,18 @@
 </head>
 <body>
 
+<div class="sidebar">
+    <div class="sidebar-header">Actions for Page "{{page_title}}"</div>
+    <div class="sidebar-btn"><a href="/plot_wiki_revisions?page_title={{page_title}}">View Revisions Over Time</a></div>
+</div>
+
+
+<div class="content">
+
 <div class="figure-wrapper">
     <div class="title">{{title}}</div>
+
+    <div class="chart-legend-wrapper">
 
     <div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>
 
@@ -87,10 +158,11 @@
         </div>
     </div>
 </div>
+    </div>
 
    <form action="/plot_wiki_editors_JINJA"   id=plot_wiki_editors_JINJA>
             <label class="label" for="page_title">Enter Page Title Here:</label><br>
-            <input class="searchbox" type="text" id="page_title" placeholder="Enter the title of a Wikipedia page." name="page_title"><br>
+            <input class="searchbox" type="text" id="page_title" placeholder="Enter the title of a Wikipedia page." name="page_title" style="width: 240px"><br>
             <button type="submit">Plot Editor Activity!</button>
         </form>
 
@@ -99,6 +171,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
 <script type="text/javascript">
 $(".searchbox").autocomplete({
+    position: { my: "left bottom", at: "left top"},
     source: function(request, response) {
         console.log(request.term);
         $.ajax({
@@ -116,6 +189,6 @@ $(".searchbox").autocomplete({
     }
 });
 </script>
-
+</div>
 </body>
 </html>
