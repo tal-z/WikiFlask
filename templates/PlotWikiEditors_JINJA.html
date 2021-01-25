@@ -25,7 +25,7 @@
         .sidebar {
             float: left;
             background: #eeeeee;
-            height: 100vh;
+            height: 120vh;
             width: 20vw;
             overflow: visible;
             border-right: 1px solid;
@@ -36,17 +36,19 @@
             padding-top: 10px;
             font-weight: bold;
             text-align: center;
+            overflow-wrap: normal;
         }
 
         .sidebar-btn {
-            text-align: center;
+            text-align: left;
+            padding-left: 10%;
         }
 
         /* Content contains everything but the sidebar and script*/
 
         .content {
             float: left;
-            width: 80%;
+            width: 80vw;
         }
 
         .figure-wrapper {
@@ -131,6 +133,9 @@
 <body>
 
 <div class="sidebar">
+    <div class="sidebar-header">Stats for Page "{{page_title}}"</div>
+    <div class="sidebar-btn">Total # of Revisions:  </div>
+    <div class="sidebar-btn">Total # of Unique Editors:  </div>
     <div class="sidebar-header">Actions for Page "{{page_title}}"</div>
     <div class="sidebar-btn"><a href="/plot_wiki_revisions?page_title={{page_title}}">View Revisions Over Time</a></div>
 </div>
