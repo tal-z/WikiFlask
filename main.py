@@ -294,9 +294,10 @@ def PlotWikiEditors_JINJA():
 
 @app.route('/plot_wiki_editors_JINJA')
 def plot_wiki_editors_JINJA():
-    page_title = request.args.get('page_title')
-    page_title = page_title[0].upper() + page_title[1:]
     try:
+        page_title = request.args.get('page_title')
+        page_title = page_title[0].upper() + page_title[1:]
+
         title = page_title.title()
         user_edits_list = user_edits(page_title).items()
         user_edits_list_len = len(user_edits_list)
@@ -350,7 +351,7 @@ def plot_wiki_editors_JINJA():
 
         return render_template('PlotWikiEditors_JINJA.html', image=pngImageB64String, user_colors=reversed(user_colors), title=title, page_title=page_title)
     except:
-        return render_template('PlotWikiEditors_JINJA.html', image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', user_colors=reversed(user_colors), title=title, page_title=page_title)
+        return render_template('PlotWikiEditors_JINJA.html', image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg')
 
 
 @app.route('/PlotWikiRevisions_JINJA')
@@ -362,11 +363,12 @@ def PlotWikiRevisions_JINJA():
 
 @app.route('/plot_wiki_revisions_JINJA')
 def plot_wiki_revisions_JINJA():
-    page_title = request.args.get('page_title')
-    page_title = page_title[0].upper() + page_title[1:]
-    title = f'Revisions to the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page Over Time'
-    print(page_title)
     try:
+        page_title = request.args.get('page_title')
+        page_title = page_title[0].upper() + page_title[1:]
+        title = f'Revisions to the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page Over Time'
+        print(page_title)
+
         timestamps = get_revision_timestamps(page_title)
         timestamps.reverse()
 
@@ -400,8 +402,17 @@ def plot_wiki_revisions_JINJA():
         return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, title=title)
 
     except:
-        html =  '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
-        return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg')
+        print(len(page_title))
+        if len(page_title) == 0:
+            title = "Search Revisions on Wikipedia Over Time"
+            html = '''<div id="chart" style="padding-left: 80px"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='static/W_mark.png', title=title)
+        else:
+            title = "Search Revisions on Wikipedia Over Time"
+            html = '''<div id="chart" style="padding-left: 80px"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg'" alt="Click below"/></div>'''
+            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title)
+
+
 
 
 
