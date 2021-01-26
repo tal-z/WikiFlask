@@ -153,11 +153,12 @@
 <div class="content">
 
 <div class="figure-wrapper">
-    <div class="title">Most Frequent Editors of the "<a href="https://en.wikipedia.org/wiki/{{title}}">{{title}}</a>" Wikipedia Page (Top 10)</div>
+  <div class="title">{{title|safe}}</div>
 
-    <div class="chart-legend-wrapper">
+    <div class="chart-legend-wrapper" style="padding-left: 80px">
 
-    <div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>
+
+        {{html|safe}}
 
     <div class="legend">
 
@@ -177,7 +178,7 @@
    <form action="/plot_wiki_editors_JINJA"   id=plot_wiki_editors_JINJA>
             <label class="label" for="page_title">Enter Page Title Here:</label><br>
             <input class="searchbox" type="text" id="page_title" placeholder="Enter the title of a Wikipedia page." name="page_title" style="width: 240px"><br>
-            <button type="submit">Plot Editor Activity!</button>
+            <button type="submit">Submit</button>
         </form>
 
                <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>

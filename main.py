@@ -289,7 +289,14 @@ def plot_wiki_editors():
 
 @app.route('/PlotWikiEditors_JINJA')
 def PlotWikiEditors_JINJA():
-    return render_template('PlotWikiEditors_JINJA.html')
+    num_revisions = ''
+    num_editors = ''
+    title = "Search Editors on Wikipedia (Top 10)"
+    html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+    return render_template('PlotWikiEditors_JINJA.html', html=html,
+                           image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg',
+                           title=title, num_revisions=num_revisions, num_editors=num_editors)
+
 
 
 @app.route('/plot_wiki_editors_JINJA')
@@ -298,20 +305,28 @@ def plot_wiki_editors_JINJA():
         page_title = request.args.get('page_title')
         page_title = page_title[0].upper() + page_title[1:]
 
-        title = page_title.title()
-        user_edits_list = user_edits(page_title).items()
+        page_title = page_title.title()
+        timestamps_and_users = get_revision_timestamps_and_users(page_title)
+        timestamps = [item[1] for item in timestamps_and_users]
+        timestamps.reverse()
+
+        editors = set(item[0] for item in timestamps_and_users)
+        num_editors = len(editors)
+
+        user_freqs = {tup[0]: [item[1] for item in timestamps_and_users if item[0] == tup[0]] for tup in
+                      timestamps_and_users}
+        user_freqs = dict(sorted(user_freqs.items(), key=lambda x: len(x[1])))
+        user_edits_list = user_freqs.items()
         user_edits_list_len = len(user_edits_list)
+
         count = 0
         color_count = 0
-        colors = ['#348ABD', '#A60628', '#7A68A6', '#467821', '#D55E00', '#CC79A7', '#56B4E9', '#009E73', '#F0E442', '#0072B2']
-        #colors = [ '#320E3B', '#FF499E', '#A480CF', '#1E2EDE', '#47A8BD',  '#53FF45',  '#EFCA08',  '#FB6107', '#EC0B43', '#89043D']
-        plt.clf()
-
-        plt.xlabel('Time', weight='bold', fontsize=16)
-        plt.ylabel('Revisions count', weight='bold', fontsize=16)
-        plt.xticks(rotation=60, font="Courier New", color="#000000", weight='bold')
-        plt.yticks(font="Courier New", color="#000000", weight='bold')
+        colors = ['#348ABD', '#A60628', '#7A68A6', '#467821', '#D55E00', '#CC79A7', '#56B4E9', '#009E73', '#F0E442',
+                  '#0072B2']
         user_colors = []
+
+        p = figure(title=page_title, x_axis_label='Time', y_axis_label='Count of Revisions', x_axis_type='datetime',
+                   tools="pan,wheel_zoom,box_zoom,undo,redo,reset,save")
 
         for entry in user_edits_list:
             timestamps = entry[1]
@@ -319,46 +334,53 @@ def plot_wiki_editors_JINJA():
 
             dates = [datetime.strptime(d, '%Y-%m-%dT%H:%M:%SZ') for d in timestamps]
 
-            plt.plot()
-
             if count >= user_edits_list_len - 10:
-                plt.plot_date(dates, range(len(dates)), linestyle='solid', linewidth=1, marker='o', markersize=3, label=entry[0], color=colors[color_count])
+                p.line(dates, range(len(dates)), name=entry[0], line_width=2, color=colors[color_count])
+
                 user_colors.append((entry[0], colors[color_count]))
                 color_count += 1
             else:
-                plt.plot_date(dates, range(len(dates)), linestyle='solid', linewidth=1, marker='o', markersize=3, label='_nolegend_', color='#D8DDDE')
+                p.line(dates, range(len(dates)), name=entry[0], line_width=2, color='#D8DDDE')
 
             count += 1
 
-        #handles, labels = plt.gca().get_legend_handles_labels()
-        #plt.legend(handles[::-1], labels[::-1], loc='upper left', ncol=1, bbox_to_anchor=(1.05, 1), borderaxespad=0.)
+        # add some interactive tools to the visual
+        p.add_tools(LassoSelectTool())
+        p.add_tools(HoverTool(tooltips=[('Name', "$name")], mode='vline'))
 
+        p.toolbar.logo = None
 
+        p.background_fill_color = "#eeeeee"
+        p.xaxis.axis_line_color = "#bcbcbc"
+        p.yaxis.axis_line_color = "#bcbcbc"
+        p.legend.visible = False
 
-        plt.tight_layout()
-        plt.tick_params(color="#000000")
-        #plt.gcf().subplots_adjust(top=.8)
-
-
-        stream = BytesIO()
-        plt.savefig(stream, format='png')
-        stream.seek(0)
-
-        pngImageB64String = "data:image/png;base64,"
-        pngImageB64String += b64encode(stream.getvalue()).decode('utf8')
-
-        print(user_colors)
-
-        return render_template('PlotWikiEditors_JINJA.html', image=pngImageB64String, user_colors=reversed(user_colors), title=title, page_title=page_title)
+        html = file_html(p, CDN, "my plot")
+        title = f'Editors of the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page (Top 10)'
+        return render_template('PlotWikiEditors_JINJA.html', html=html, user_colors=reversed(user_colors), title=title, page_title=page_title)
     except:
-        return render_template('PlotWikiEditors_JINJA.html', image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg')
+        if len(page_title) == 0:
+            num_revisions = ''
+            num_editors = ''
+            title = "Search Editors on Wikipedia (Top 10)"
+            html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+            return render_template('PlotWikiEditors_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title, num_revisions=num_revisions, num_editors=num_editors)
+        else:
+            num_revisions = 0
+            num_editors = 0
+            title = "Search Editors on Wikipedia (Top 10)"
+            html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg'" alt="Click below"/></div>'''
+            return render_template('PlotWikiEditors_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title, num_revisions=num_revisions, num_editors=num_editors)
+
 
 
 @app.route('/PlotWikiRevisions_JINJA')
 def PlotWikiRevisions_JINJA():
-    html =  '''<div id="chart" style="padding-left: 80px"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+    html =  '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
     title = "Search Revisions on Wikipedia Over Time"
-    return render_template('PlotWikiRevisions_JINJA.html', html=html, title=title)
+    num_revisions = ''
+    num_editors = ''
+    return render_template('PlotWikiRevisions_JINJA.html', html=html, title=title, num_revisions=num_revisions, num_editors=num_editors)
 
 
 @app.route('/plot_wiki_revisions_JINJA')
@@ -369,8 +391,13 @@ def plot_wiki_revisions_JINJA():
         title = f'Revisions to the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page Over Time'
         print(page_title)
 
-        timestamps = get_revision_timestamps(page_title)
+        timestamps_and_users = get_revision_timestamps_and_users(page_title)
+        timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
+        num_revisions = len(timestamps)
+
+        editors = set(item[0] for item in timestamps_and_users)
+        num_editors = len(editors)
 
         dates = []
         for stamp in timestamps:
@@ -399,18 +426,22 @@ def plot_wiki_revisions_JINJA():
 
         html = file_html(p, CDN, page_title)
 
-        return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, title=title)
+        return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, title=title, num_revisions=num_revisions, num_editors=num_editors)
 
     except:
         print(len(page_title))
         if len(page_title) == 0:
+            num_revisions = ''
+            num_editors = ''
             title = "Search Revisions on Wikipedia Over Time"
-            html = '''<div id="chart" style="padding-left: 80px"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
-            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='static/W_mark.png', title=title)
+            html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='static/W_mark.png', title=title, num_revisions=num_revisions, num_editors=num_editors)
         else:
+            num_revisions = 0
+            num_editors = 0
             title = "Search Revisions on Wikipedia Over Time"
-            html = '''<div id="chart" style="padding-left: 80px"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg'" alt="Click below"/></div>'''
-            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title)
+            html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg'" alt="Click below"/></div>'''
+            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title, num_revisions=num_revisions, num_editors=num_editors)
 
 
 
