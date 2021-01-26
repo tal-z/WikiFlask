@@ -22,6 +22,7 @@ plt.style.use('bmh')
 # define a function that will get all of the revision timestamps for a given article
 # The function takes a string of the correctly-spelled article title as its argument
 
+#for removal
 def get_revision_timestamps(TITLE):
     # base URL for API call
     BASE_URL = "http://en.wikipedia.org/w/api.php"
@@ -159,6 +160,7 @@ def get_revision_timestamps_and_users(TITLE=str):
     # end by returning a list of revision timestamps
     return revision_list
 
+#I think for removal
 def user_edits(title=str):
     stamps_users = get_revision_timestamps_and_users(title)
     user_freqs = {tup[0]:[item[1] for item in stamps_users if item[0]==tup[0]] for tup in stamps_users}
@@ -186,13 +188,12 @@ def index():
     return render_template('site-map.html', links=links)
     # links is now a list of url, endpoint tuples
 
-
-
+#for removal
 @app.route('/PlotWikiRevisions')
 def PlotWikiRevisions():
     return render_template('PlotWikiRevisions.html')
 
-
+#for removal
 @app.route('/plot_wiki_revisions')
 def plot_wiki_revisions():
     page_title = request.args.get('page_title')
@@ -229,12 +230,12 @@ def plot_wiki_revisions():
     except:
         return render_template('PlotWikiRevisions.html', image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg')
 
-
+#for removal
 @app.route('/PlotWikiEditors')
 def PlotWikiEditors():
     return render_template('PlotWikiEditors.html')
 
-
+#for removal
 @app.route('/plot_wiki_editors')
 def plot_wiki_editors():
     page_title = request.args.get('page_title')
@@ -296,7 +297,6 @@ def PlotWikiEditors_JINJA():
     return render_template('PlotWikiEditors_JINJA.html', html=html,
                            image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg',
                            title=title, num_revisions=num_revisions, num_editors=num_editors)
-
 
 
 @app.route('/plot_wiki_editors_JINJA')
@@ -373,7 +373,6 @@ def plot_wiki_editors_JINJA():
             title = "Search Editors on Wikipedia (Top 10)"
             html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg'" alt="Click below"/></div>'''
             return render_template('PlotWikiEditors_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title, num_revisions=num_revisions, num_editors=num_editors)
-
 
 
 @app.route('/PlotWikiRevisions_JINJA')
