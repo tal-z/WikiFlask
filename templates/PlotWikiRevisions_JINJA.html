@@ -130,7 +130,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Plot Wikipedia Editors</title>
+    <title>Plot Wikipedia Revisions</title>
 </head>
 <body>
 
@@ -139,18 +139,19 @@
     <div class="sidebar-btn">Total # of Revisions:  </div>
     <div class="sidebar-btn">Total # of Unique Editors:  </div>
     <div class="sidebar-header">Page Actions: {{page_title}}</div>
-    <div class="sidebar-btn"><a href="/plot_wiki_revisions_JINJA?page_title={{page_title}}">View Revisions Over Time</a></div>
+    <div class="sidebar-btn"><a href="/plot_wiki_editors_JINJA?page_title={{page_title}}">View Top 10 Editors</a></div>
 </div>
 
 
 <div class="content">
 
 <div class="figure-wrapper">
-    <div class="title">Most Frequent Editors of the "<a href="https://en.wikipedia.org/wiki/{{title}}">{{title}}</a>" Wikipedia Page (Top 10)</div>
+    <div class="title">{{title|safe}}</div>
 
     <div class="chart-legend-wrapper">
 
-    <div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>
+        {{html|safe}}
+
 
     <div class="legend">
 
@@ -167,7 +168,7 @@
 </div>
     </div>
 
-   <form action="/plot_wiki_editors_JINJA"   id=plot_wiki_editors_JINJA>
+   <form action="/plot_wiki_revisions_JINJA"   id=plot_wiki_revisions_JINJA>
             <label class="label" for="page_title">Enter Page Title Here:</label><br>
             <input class="searchbox" type="text" id="page_title" placeholder="Enter the title of a Wikipedia page." name="page_title" style="width: 240px"><br>
             <button type="submit">Plot Editor Activity!</button>

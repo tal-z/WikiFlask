@@ -7,8 +7,14 @@ import matplotlib
 matplotlib.use('Agg')
 from base64 import b64encode
 from matplotlib import rcParams
+from bokeh.plotting import figure, output_file, show
+import requests
+from datetime import datetime
+from bokeh.embed import file_html
+from bokeh.resources import CDN
+from bokeh.models import LassoSelectTool, HoverTool, axes
 rcParams['font.family'] = 'monospace'
-rcParams['font.monospace'] = ["Lucida Console", "Courier New"]
+rcParams['font.monospace'] = ["Hoefler Text", "Lucida Console", "Courier New"]
 rcParams['axes.linewidth'] = .75
 plt.style.use('bmh')
 
@@ -281,17 +287,17 @@ def plot_wiki_editors():
         return render_template('PlotWikiEditors.html', image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg')
 
 
-
 @app.route('/PlotWikiEditors_JINJA')
 def PlotWikiEditors_JINJA():
     return render_template('PlotWikiEditors_JINJA.html')
+
 
 @app.route('/plot_wiki_editors_JINJA')
 def plot_wiki_editors_JINJA():
     page_title = request.args.get('page_title')
     page_title = page_title[0].upper() + page_title[1:]
     try:
-        title = f'Most Frequent Editors of the "{page_title.title()}" Wikipedia Page (Top 10)'
+        title = page_title.title()
         user_edits_list = user_edits(page_title).items()
         user_edits_list_len = len(user_edits_list)
         count = 0
@@ -345,6 +351,58 @@ def plot_wiki_editors_JINJA():
         return render_template('PlotWikiEditors_JINJA.html', image=pngImageB64String, user_colors=reversed(user_colors), title=title, page_title=page_title)
     except:
         return render_template('PlotWikiEditors_JINJA.html', image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', user_colors=reversed(user_colors), title=title, page_title=page_title)
+
+
+@app.route('/PlotWikiRevisions_JINJA')
+def PlotWikiRevisions_JINJA():
+    html =  '''<div id="chart" style="padding-left: 80px"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+    title = "Search Revisions on Wikipedia Over Time"
+    return render_template('PlotWikiRevisions_JINJA.html', html=html, title=title)
+
+
+@app.route('/plot_wiki_revisions_JINJA')
+def plot_wiki_revisions_JINJA():
+    page_title = request.args.get('page_title')
+    page_title = page_title[0].upper() + page_title[1:]
+    title = f'Revisions to the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page Over Time'
+    print(page_title)
+    try:
+        timestamps = get_revision_timestamps(page_title)
+        timestamps.reverse()
+
+        dates = []
+        for stamp in timestamps:
+            d = datetime.strptime(stamp, '%Y-%m-%dT%H:%M:%SZ')
+            dates.append(d)
+
+        p = figure(title=page_title, x_axis_label='time', y_axis_label='#revisions', x_axis_type='datetime',
+                   tools="pan,wheel_zoom,box_zoom,reset,save")
+
+        # add a line renderer with legend and line thickness
+        p.line(dates, range(len(dates)), legend_label=page_title, line_width=2)
+
+        # add some interactive tools to the visual
+        p.add_tools(LassoSelectTool())
+        p.add_tools(HoverTool(tooltips=[('# of Revisions', "$index")], mode='vline'))
+
+        p.toolbar.logo = None
+
+        p.background_fill_color = "#eeeeee"
+        p.xaxis.axis_line_color = "#bcbcbc"
+        p.yaxis.axis_line_color = "#bcbcbc"
+        p.legend.visible = False
+
+
+
+
+        html = file_html(p, CDN, page_title)
+
+        return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, title=title)
+
+    except:
+        html =  '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+        return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg')
+
 
 
 if __name__ == "__main__":
