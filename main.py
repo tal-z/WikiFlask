@@ -309,6 +309,8 @@ def plot_wiki_editors_JINJA():
         timestamps_and_users = get_revision_timestamps_and_users(page_title)
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
+        num_revisions = len(timestamps)
+
 
         editors = set(item[0] for item in timestamps_and_users)
         num_editors = len(editors)
@@ -329,10 +331,10 @@ def plot_wiki_editors_JINJA():
                    tools="pan,wheel_zoom,box_zoom,undo,redo,reset,save")
 
         for entry in user_edits_list:
-            timestamps = entry[1]
-            timestamps.reverse()
+            ts = entry[1]
+            ts.reverse()
 
-            dates = [datetime.strptime(d, '%Y-%m-%dT%H:%M:%SZ') for d in timestamps]
+            dates = [datetime.strptime(d, '%Y-%m-%dT%H:%M:%SZ') for d in ts]
 
             if count >= user_edits_list_len - 10:
                 p.line(dates, range(len(dates)), name=entry[0], line_width=2, color=colors[color_count])
@@ -353,11 +355,11 @@ def plot_wiki_editors_JINJA():
         p.background_fill_color = "#eeeeee"
         p.xaxis.axis_line_color = "#bcbcbc"
         p.yaxis.axis_line_color = "#bcbcbc"
-        p.legend.visible = False
+        #p.legend.visible = False
 
         html = file_html(p, CDN, "my plot")
         title = f'Editors of the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page (Top 10)'
-        return render_template('PlotWikiEditors_JINJA.html', html=html, user_colors=reversed(user_colors), title=title, page_title=page_title)
+        return render_template('PlotWikiEditors_JINJA.html', html=html, user_colors=reversed(user_colors), title=title, page_title=page_title, num_revisions=num_revisions, num_editors=num_editors)
     except:
         if len(page_title) == 0:
             num_revisions = ''

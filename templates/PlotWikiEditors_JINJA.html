@@ -52,6 +52,13 @@
             padding-left: 10%;
         }
 
+        .sidebar-sig {
+            padding: 10px;
+            text-align: left;
+            position: fixed;
+            bottom: 0vh;
+        }
+
         /* Content contains everything but the sidebar and script*/
 
         .content {
@@ -70,11 +77,11 @@
              font-size: 30px;
              width: 100%;
              font-weight: bold;
-             padding-left: 85px;
-
+             padding-left: 80px;
         }
 
         .chart-legend-wrapper {
+            display: inline-block;
             white-space: nowrap;
         }
 
@@ -115,8 +122,9 @@
 
     .legend {
         position: sticky;
-        /*padding: 3px 3px 3px 3px;*/
-        margin-top: 16px;
+        padding: 3px 3px 3px 3px;
+        margin-top: 27px;
+        margin-left: 10px;
         display: inline-block;
         vertical-align:top;
         background: #eeeeee;
@@ -128,7 +136,7 @@
 
     form {
         margin: 10px;
-        padding-left: 85px;
+        padding-left: 90px;
     }
 
 
@@ -141,12 +149,13 @@
 <body>
 
 <div class="sidebar">
-    <img class="sidebar-img" src="static/WikiGlobe.png"/>
+    <a href="/" style="width: inherit"><img class="sidebar-img" src="static/WikiGlobe.png"></a>
     <div class="sidebar-header">Page Stats: {{page_title}}</div>
-    <div class="sidebar-btn">Total # of Revisions:  </div>
-    <div class="sidebar-btn">Total # of Unique Editors:  </div>
+    <div class="sidebar-btn">Total # of Revisions: {{num_revisions}}</div>
+    <div class="sidebar-btn">Total # of Unique Editors: {{num_editors}}</div>
     <div class="sidebar-header">Page Actions: {{page_title}}</div>
-    <div class="sidebar-btn"><a href="/plot_wiki_revisions_JINJA?page_title={{page_title}}">View Revisions Over Time</a></div>
+    <div class="sidebar-btn"><a href="/plot_wiki_editors_JINJA?page_title={{page_title}}">View Top 10 Editors</a></div>
+    <div class="sidebar-sig">Created by <a href="https://talzaken.pythonanywhere.com" target="_blank">Tal Zaken</a></div>
 </div>
 
 
@@ -158,7 +167,7 @@
     <div class="chart-legend-wrapper" style="padding-left: 80px">
 
 
-        {{html|safe}}
+        <div id="chart">{{html|safe}}</div>
 
     <div class="legend">
 
