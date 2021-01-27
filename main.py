@@ -305,7 +305,7 @@ def plot_wiki_editors_JINJA():
         page_title = request.args.get('page_title')
         page_title = page_title[0].upper() + page_title[1:]
 
-        page_title = page_title.title()
+        #page_title = page_title.title()
         timestamps_and_users = get_revision_timestamps_and_users(page_title)
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
@@ -341,14 +341,14 @@ def plot_wiki_editors_JINJA():
 
                 user_colors.append((entry[0], colors[color_count]))
                 color_count += 1
-            else:
-                p.line(dates, range(len(dates)), name=entry[0], line_width=2, color='#D8DDDE')
+            #else:
+              #  p.line(dates, range(len(dates)), name=entry[0], line_width=2, color='#D8DDDE')
 
             count += 1
 
         # add some interactive tools to the visual
         p.add_tools(LassoSelectTool())
-        p.add_tools(HoverTool(tooltips=[('Name', "$name")], mode='vline'))
+        p.add_tools(HoverTool(tooltips=[('Name', "$name"), ('Revision #', "$index")], mode='vline'))
 
         p.toolbar.logo = None
 
@@ -405,7 +405,7 @@ def plot_wiki_revisions_JINJA():
             d = datetime.strptime(stamp, '%Y-%m-%dT%H:%M:%SZ')
             dates.append(d)
 
-        p = figure(title=page_title, x_axis_label='time', y_axis_label='#revisions', x_axis_type='datetime',
+        p = figure(title=page_title, x_axis_label='Time', y_axis_label='Count of Revisions', x_axis_type='datetime',
                    tools="pan,wheel_zoom,box_zoom,reset,save")
 
         # add a line renderer with legend and line thickness
