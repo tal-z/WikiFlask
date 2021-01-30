@@ -1,5 +1,5 @@
 # WikiTools
-Webapp tools for building Wikipedia literacy. Built with Flask, Jinja, Matplotlib (for now), Bokeh, and various MediaWiki APIs.
+Webapp tools for building Wikipedia literacy. Built with Flask, Jinja, Bokeh, and various MediaWiki APIs.
 
 ## Tools:
 - <b>PlotWikiRevisions:</b> A widget to plot the revisions to a given Wikipedia page over time.
