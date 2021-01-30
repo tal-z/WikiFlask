@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, session
 import requests
 from datetime import datetime
 from io import BytesIO
@@ -12,7 +12,7 @@ import requests
 from datetime import datetime
 from bokeh.embed import file_html
 from bokeh.resources import CDN
-from bokeh.models import LassoSelectTool, HoverTool, axes
+from bokeh.models import LassoSelectTool, HoverTool, ColumnDataSource, Band
 rcParams['font.family'] = 'monospace'
 rcParams['font.monospace'] = ["Hoefler Text", "Lucida Console", "Courier New"]
 rcParams['axes.linewidth'] = .75
@@ -174,6 +174,9 @@ def has_no_empty_params(rule):
 
 app = Flask(__name__)
 
+
+
+
 @app.route("/")
 def index():
     links = []
@@ -305,7 +308,6 @@ def plot_wiki_editors_JINJA():
         page_title = request.args.get('page_title')
         page_title = page_title[0].upper() + page_title[1:]
 
-        #page_title = page_title.title()
         timestamps_and_users = get_revision_timestamps_and_users(page_title)
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
@@ -390,7 +392,6 @@ def plot_wiki_revisions_JINJA():
         page_title = request.args.get('page_title')
         page_title = page_title[0].upper() + page_title[1:]
         title = f'Revisions to the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page Over Time'
-        print(page_title)
 
         timestamps_and_users = get_revision_timestamps_and_users(page_title)
         timestamps = [item[1] for item in timestamps_and_users]
@@ -445,8 +446,111 @@ def plot_wiki_revisions_JINJA():
             return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title, num_revisions=num_revisions, num_editors=num_editors)
 
 
+@app.route('/PlotWikiRevFreqs_JINJA')
+def PlotWikiRevFreqs_JINJA():
+    html =  '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+    title = "Search Revisions on Wikipedia Over Time"
+    num_revisions = ''
+    num_editors = ''
+    return render_template('PlotWikiRevFreqs_JINJA.html', html=html, title=title, num_revisions=num_revisions, num_editors=num_editors)
+
+
+@app.route('/plot_wiki_rev_freqs_JINJA')
+def plot_wiki_rev_freqs_JINJA():
+    try:
+        page_title = request.args.get('page_title')
+        page_title = page_title[0].upper() + page_title[1:]
+        title = f'Frequency of Revisions to the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page'
+
+        timestamps_and_users = get_revision_timestamps_and_users(page_title)
+        timestamps = [item[1] for item in timestamps_and_users]
+        timestamps.reverse()
+        num_revisions = len(timestamps)
+
+        editors = set(item[0] for item in timestamps_and_users)
+        num_editors = len(editors)
+
+        dates = [datetime.strptime(d, '%Y-%m-%dT%H:%M:%SZ').date() for d in timestamps]
+        days = sorted(list(set(dates)))
+
+        date_freqs = {}
+        for date in dates:
+            if not str(date) in date_freqs:
+                date_freqs[str(date)] = 1
+            else:
+                date_freqs[str(date)] += 1
+
+        date_freqs = [item[1] for item in sorted(date_freqs.items(), key=lambda x: x[0])]
+
+        days_str = days
+        days = [datetime.combine(day, datetime.min.time()) for day in days]
+
+
+
+        source = ColumnDataSource(data=dict(x_values=days,
+                                            y_values=date_freqs,
+                                            desc=days_str,
+                                            yy_values=[d-1 for d in date_freqs],
+                                            color=['#0072B2' for d in days],
+                                            color2=['red' for d in days],
+                                            ))
+
+        def get_width():
+            mindate = min(source.data['x_values'])
+            maxdate = max(source.data['x_values'])
+            return 0.8 * (maxdate - mindate).total_seconds() * 1000 / len(source.data['x_values'])
+
+        p = figure(title=page_title, x_axis_label='Time In Days', y_axis_label='Revisions Per Day', x_axis_type='datetime',
+                   tools="pan,wheel_zoom,box_zoom,undo,redo,reset,save")
+
+        # add a line renderer with legend and line thickness
+        p.line('x_values', 'y_values', name=page_title, color='red', source=source, alpha=0)
+
+        # Note that there is a bug with vertical bars and hovertools. A fix is in the works per GitHub.
+        p.vbar(x='x_values', width=get_width(), color='color', top='y_values', bottom=0, source=source)
+        #p.vbar(x='x_values', width=1 / len(days), color='color2', top='yy_values', bottom=0, source=source)
+
+        #band = Band(base='x_values', upper='y_values', source=source, level='underlay',
+         #           fill_alpha=0.2, fill_color='#55FF88')
+        #p.add_layout(band)
+
+
+
+        # add some interactive tools to the visual
+        p.add_tools(LassoSelectTool())
+        p.add_tools(HoverTool(tooltips=[("Date", "@desc"), ("# Revisions", "@y_values")], mode='vline'))
+
+        p.toolbar.logo = None
+
+        p.background_fill_color = "#eeeeee"
+        p.xaxis.axis_line_color = "#bcbcbc"
+        p.yaxis.axis_line_color = "#bcbcbc"
+        #p.legend.visible = False
+
+
+
+
+        html = file_html(p, CDN, page_title)
+
+        return render_template('PlotWikiRevFreqs_JINJA.html', html=html, page_title=page_title, title=title, num_revisions=num_revisions, num_editors=num_editors)
+
+    except:
+        print(len(page_title))
+        if len(page_title) == 0:
+            num_revisions = ''
+            num_editors = ''
+            title = "Search Revisions on Wikipedia Over Time"
+            html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
+            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='static/W_mark.png', title=title, num_revisions=num_revisions, num_editors=num_editors)
+        else:
+            num_revisions = 0
+            num_editors = 0
+            title = "Search Revisions on Wikipedia Over Time"
+            html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg'" alt="Click below"/></div>'''
+            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title, num_revisions=num_revisions, num_editors=num_editors)
 
 
 
 if __name__ == "__main__":
+    app.secret_key = 'helloworld'
     app.run(debug=True)

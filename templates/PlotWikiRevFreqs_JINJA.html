@@ -112,8 +112,6 @@
             white-space: nowrap;
             font-family:  "Hoefler Text", "Courier New", "Lucida Console", monospace;
             padding: 3px 3px 3px 3px;
-
-
         }
 
         #circle {
@@ -123,7 +121,6 @@
             -webkit-border-radius: 8px;
             -moz-border-radius: 8px;
             white-space: nowrap;
-            margin: 3px;
         }
 
 
@@ -139,7 +136,7 @@
         display: inline-block;
         vertical-align:top;
         background: #eeeeee;
-        border-style: solid;
+        /*border-style: solid;*/
         border-color: #bcbcbc;
         border-width: 1px;
         /*min-width: 100px;*/
@@ -153,12 +150,11 @@
     }
 
 
-
     </style>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Plot Wikipedia Editors</title>
+    <title>Plot Wikipedia Revisions</title>
 </head>
 <body>
 
@@ -168,7 +164,7 @@
     <div class="sidebar-btn">Total # of Revisions: {{num_revisions}}</div>
     <div class="sidebar-btn">Total # of Unique Editors: {{num_editors}}</div>
     <div class="sidebar-header">Page Actions: {{page_title}}</div>
-    <div class="sidebar-btn"><a href="/plot_wiki_revisions_JINJA?page_title={{page_title}}">View Revisions Over Time</a></div>
+    <div class="sidebar-btn"><a href="/plot_wiki_editors_JINJA?page_title={{page_title}}">View Top 10 Editors</a></div>
     <div class="sidebar-sig">Created by <a href="https://talzaken.pythonanywhere.com" target="_blank">Tal Zaken</a></div>
 </div>
 
@@ -176,16 +172,16 @@
 <div class="content">
 
 <div class="figure-wrapper">
-  <div class="title">{{title|safe}}</div>
+    <div class="title">{{title|safe}}</div>
 
     <div class="chart-legend-wrapper" style="padding-left: 80px">
-
 
         <div id="chart">{{html|safe}}</div>
 
     <div class="legend">
 
         <div class="editors">
+            <script>
             {% for item in user_colors %}
 
                 <div id="circle" style="background: {{item[1]}}"></div>
@@ -193,12 +189,13 @@
                 <br>
 
             {% endfor %}
+            </script>
         </div>
     </div>
 </div>
     </div>
 
-   <form action="/plot_wiki_editors_JINJA"   id=plot_wiki_editors_JINJA>
+   <form action="/plot_wiki_rev_freqs_JINJA"   id=plot_wiki_rev_freqs_JINJA>
             <label class="label" for="page_title">Enter Page Title Here:</label><br>
             <input class="searchbox" type="text" id="page_title" placeholder="Enter the title of a Wikipedia page." name="page_title" style="width: 240px"><br>
             <button type="submit">Submit</button>
