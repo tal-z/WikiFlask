@@ -7,6 +7,10 @@ Webapp tools for building Wikipedia literacy. Built with Flask, Jinja, Matplotli
 
 
 ## ToDo
-Sidebar Edits:
-    Add average Edit Length
-    Add original author
+#### Structural Changes:
+- Make wiki API call better:
+  - have it return a dictionary instead of a tuple
+  - have it take rvprops as a list       
+
+#### Sidebar Edits:
+- Add average Edit Length

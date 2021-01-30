@@ -1,23 +1,14 @@
-from flask import Flask, render_template, request, url_for, session
-from io import BytesIO
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Agg')
-from base64 import b64encode
-from matplotlib import rcParams
-from bokeh.plotting import figure, output_file, show
-import requests
 from datetime import datetime
+import requests
+import numpy as np
+from flask import Flask, render_template, request, url_for
+from bokeh.plotting import figure
 from bokeh.embed import file_html
 from bokeh.resources import CDN
-from bokeh.models import LassoSelectTool, HoverTool, ColumnDataSource, Band
+from bokeh.models import LassoSelectTool, HoverTool, ColumnDataSource
 from bokeh.models.widgets import Panel, Tabs
-import numpy as np
 
-rcParams['font.family'] = 'monospace'
-rcParams['font.monospace'] = ["Hoefler Text", "Lucida Console", "Courier New"]
-rcParams['axes.linewidth'] = .75
-plt.style.use('bmh')
+
 
 
 ## for improvement.
@@ -106,7 +97,7 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def index():
+def Index():
     links = []
     for rule in app.url_map.iter_rules():
         # Filter out rules we can't navigate to in a browser
@@ -144,7 +135,7 @@ def plot_wiki_editors_JINJA():
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
         num_revisions = len(timestamps)
-
+        orig_author = timestamps_and_users[-1][0]
 
         editors = set(item[0] for item in timestamps_and_users)
         num_editors = len(editors)
@@ -185,7 +176,7 @@ def plot_wiki_editors_JINJA():
 
         # add some interactive tools to the visual
         p.add_tools(LassoSelectTool())
-        p.add_tools(HoverTool(tooltips=[('Name', "$name"), ('Revision #', "$index")], mode='vline'))
+        p.add_tools(HoverTool(tooltips=[('Name', "$name"), ('Revision #', "$index")], mode='mouse'))
 
         p.toolbar.logo = None
 
@@ -202,7 +193,8 @@ def plot_wiki_editors_JINJA():
                                title=title,
                                page_title=page_title,
                                num_revisions=num_revisions,
-                               num_editors=num_editors)
+                               num_editors=num_editors,
+                               orig_author=orig_author)
 
     except:
         if len(page_title) == 0:
@@ -255,6 +247,7 @@ def plot_wiki_revisions_JINJA():
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
         num_revisions = len(timestamps)
+        orig_author = timestamps_and_users[-1][0]
 
         editors = set(item[0] for item in timestamps_and_users)
         num_editors = len(editors)
@@ -313,7 +306,7 @@ def plot_wiki_revisions_JINJA():
         tab1 = Panel(child=p1, title='Frequency')
 
         p2 = figure(title=page_title,
-                    x_axis_label='Time',
+                    x_axis_label='Time in Days',
                     y_axis_label='Count of Revisions',
                     x_axis_type='datetime',
                     tools="pan,wheel_zoom,box_zoom,reset,save")
@@ -340,7 +333,13 @@ def plot_wiki_revisions_JINJA():
 
         html = file_html(tabs, CDN, page_title)
 
-        return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, title=title, num_revisions=num_revisions, num_editors=num_editors)
+        return render_template('PlotWikiRevisions_JINJA.html',
+                               html=html,
+                               page_title=page_title,
+                               title=title,
+                               num_revisions=num_revisions,
+                               num_editors=num_editors,
+                               orig_author=orig_author)
 
     except:
         print(len(page_title))
@@ -349,13 +348,25 @@ def plot_wiki_revisions_JINJA():
             num_editors = ''
             title = "Search Revisions on Wikipedia Over Time"
             html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='static/W_mark.png'" alt="Click below"/></div>'''
-            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='static/W_mark.png', title=title, num_revisions=num_revisions, num_editors=num_editors)
+            return render_template('PlotWikiRevisions_JINJA.html',
+                                   html=html,
+                                   page_title=page_title,
+                                   image='static/W_mark.png',
+                                   title=title,
+                                   num_revisions=num_revisions,
+                                   num_editors=num_editors)
         else:
             num_revisions = 0
             num_editors = 0
             title = "Search Revisions on Wikipedia Over Time"
             html = '''<div id="chart"><img class="about" src="{{image}}" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg'" alt="Click below"/></div>'''
-            return render_template('PlotWikiRevisions_JINJA.html', html=html, page_title=page_title, image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg', title=title, num_revisions=num_revisions, num_editors=num_editors)
+            return render_template('PlotWikiRevisions_JINJA.html',
+                                   html=html,
+                                   page_title=page_title,
+                                   image='https://upload.wikimedia.org/wikipedia/commons/a/a0/Font_Awesome_5_regular_frown.svg',
+                                   title=title,
+                                   num_revisions=num_revisions,
+                                   num_editors=num_editors)
 
 
 if __name__ == "__main__":

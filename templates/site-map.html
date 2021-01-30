@@ -1,3 +1,45 @@
-  {% for item in links|sort %}
+<head>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family:  "Hoefler Text", "Courier New", "Lucida Console", monospace;
+        }
+
+        html,body {
+            margin: 0;
+            padding: 10px 10px 10px 10px;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .links-title, .routes-title {
+            font-size: 20px;
+            padding-bottom: 5px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="links">
+    <div class="links-title" >Links</div>
+{% for item in links|sort %}
+    {% if item[1][0] == item[1][0].upper()%}
 <a href={{item[0]}}>{{item[1]}}</a><br>
+    {%endif%}
     {% endfor %}
+</div>
+
+<div class="routes">
+    <br>
+    <div class="routes-title" >Routes</div>
+{% for item in links|sort %}
+    {% if item[1][0] == item[1][0].lower()%}
+<a href={{item[0]}}>{{item[1]}}</a><br>
+    {%endif%}
+    {% endfor %}
+</div>
+
+</body>
