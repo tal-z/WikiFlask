@@ -6,7 +6,7 @@ Webapp tools for building Wikipedia literacy. Built with Flask, Jinja2, Bokeh, a
 - <b>PlotWikiEditors:</b> A widget to view the top ten editors by frequency for a given Wikipedia page over time.
 
 
-## ToDo
+## ToDo:
 #### Structural Changes:
 - Make wiki API call better:
   - have it return a dictionary instead of a tuple
@@ -14,3 +14,10 @@ Webapp tools for building Wikipedia literacy. Built with Flask, Jinja2, Bokeh, a
 
 #### Sidebar Edits:
 - Add average Edit Length
+
+
+## Resources:
+###### MediaWiki Action API Documentation
+- https://www.mediawiki.org/wiki/API:Main_page
+###### Bokeh Users Guide
+- https://docs.bokeh.org/en/latest/docs/user_guide.html
