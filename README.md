@@ -9,8 +9,9 @@ Webapp tools for building Wikipedia literacy. Built with Flask, Jinja2, Bokeh, a
 ## ToDo:
 #### Structural Changes:
 - Make wiki API call better:
-  - have it return a dictionary instead of a tuple
-  - have it take rvprops as a list       
+  - have it return a JSON instead of a tuple
+  - have it take rvprops as a list      
+  - have it  return more page info (pageviews...
 
 #### Sidebar Edits:
 - Add average Edit Length
