@@ -7,6 +7,8 @@ from bokeh.embed import file_html
 from bokeh.resources import CDN
 from bokeh.models import LassoSelectTool, HoverTool, ColumnDataSource
 from bokeh.models.widgets import Panel, Tabs
+import urllib.parse
+import ast
 
 
 
@@ -131,7 +133,13 @@ def plot_wiki_editors_JINJA():
         page_title = request.args.get('page_title')
         page_title = page_title[0].upper() + page_title[1:]
 
-        timestamps_and_users = get_revision_timestamps_and_users(page_title)
+        try:
+            timestamps_and_users = urllib.parse.unquote(request.args.get('chart_data'))
+            timestamps_and_users = ast.literal_eval(timestamps_and_users)
+
+        except:
+            timestamps_and_users = get_revision_timestamps_and_users(page_title)
+
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
         num_revisions = len(timestamps)
@@ -187,6 +195,7 @@ def plot_wiki_editors_JINJA():
 
         html = file_html(p, CDN, "my plot")
         title = f'Editors of the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page (Top 10)'
+        chart_data = urllib.parse.urlencode({'chart_data':timestamps_and_users})
         return render_template('PlotWikiEditors_JINJA.html',
                                html=html,
                                user_colors=reversed(user_colors),
@@ -194,7 +203,8 @@ def plot_wiki_editors_JINJA():
                                page_title=page_title,
                                num_revisions=num_revisions,
                                num_editors=num_editors,
-                               orig_author=orig_author)
+                               orig_author=orig_author,
+                               chart_data=chart_data)
 
     except:
         if len(page_title) == 0:
@@ -243,7 +253,13 @@ def plot_wiki_revisions_JINJA():
         page_title = page_title[0].upper() + page_title[1:]
         title = f'Revisions to the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page Over Time'
 
-        timestamps_and_users = get_revision_timestamps_and_users(page_title)
+        try:
+            timestamps_and_users = urllib.parse.unquote(request.args.get('chart_data'))
+            timestamps_and_users = ast.literal_eval(timestamps_and_users)
+
+        except:
+            timestamps_and_users = get_revision_timestamps_and_users(page_title)
+
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
         num_revisions = len(timestamps)
@@ -332,14 +348,15 @@ def plot_wiki_revisions_JINJA():
         tabs = Tabs(tabs=[tab1, tab2])
 
         html = file_html(tabs, CDN, page_title)
-
+        chart_data = urllib.parse.urlencode({'chart_data':timestamps_and_users})
         return render_template('PlotWikiRevisions_JINJA.html',
                                html=html,
                                page_title=page_title,
                                title=title,
                                num_revisions=num_revisions,
                                num_editors=num_editors,
-                               orig_author=orig_author)
+                               orig_author=orig_author,
+                               chart_data=chart_data)
 
     except:
         print(len(page_title))
