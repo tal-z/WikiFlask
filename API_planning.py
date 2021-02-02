@@ -104,5 +104,77 @@ class Wiki_Query():
 
 
 
-page = Wiki_Query(title='Ted Cruz')
+#page = Wiki_Query(title='Ted Cruz')
 
+def get_revision_timestamps_and_users(TITLE=str):
+    # base URL for API call
+    BASE_URL = "http://en.wikipedia.org/w/api.php"
+
+    # empty list to hold our timestamps once retrieved.
+    revision_list = []
+
+    # first API call. This loop persists while revision_list is empty
+    while not revision_list:
+        # set parameters for API call
+        parameters = {'action': 'query',
+                      'format': 'json',
+                      'continue': '',
+                      'titles': TITLE,
+                      'prop': 'revisions',
+                      'rvprop': 'ids|user|timestamp',
+                      'rvlimit': '500'}
+        # make the call
+        wp_call = requests.get(BASE_URL, params=parameters)
+        # get the response
+        response = wp_call.json()
+
+        # now we parse the response.
+        pages = response['query']['pages']
+        page_id = list(pages.keys())[0]
+        page_info = pages[str(page_id)]
+        revisions = page_info['revisions']
+
+        # Now that the response has been parsed and we can access the revision timestamps, add them to our revision_list.
+        for entry in revisions:
+            try:
+                revision_list.append((str(entry['user']), entry['timestamp']))
+            except:
+                revision_list.append(('None', entry['timestamp']))
+
+        # revision_list is no longer empty, so this loop breaks.
+
+
+    ## next series of passes, until you're done.
+    ## this makes calls until the limit of 500 results per call is no longer reached.
+    else:
+        while str(len(revisions)) == parameters['rvlimit']:
+            start_id = revision_list[-1]
+            parameters = {'action': 'query',
+                          'format': 'json',
+                          'continue': '',
+                          'titles': TITLE,
+                          'prop': 'revisions',
+                          'rvprop': 'ids|user|timestamp',
+                          'rvlimit': '500',
+                          'rvstart': start_id}
+
+            # same as before
+            wp_call = requests.get(BASE_URL, params=parameters)
+            response = wp_call.json()
+
+            pages = response['query']['pages']
+            page_id = list(pages.keys())[0]
+            page_info = pages[str(page_id)]
+            revisions = page_info['revisions']
+
+            for entry in revisions:
+                try:
+                    revision_list.append((str(entry['user']), entry['timestamp']))
+                except:
+                    revision_list.append(('None', entry['timestamp']))
+
+    # end by returning a list of revision timestamps
+    return revision_list
+
+
+get_revision_timestamps_and_users('Little red lighthouse')

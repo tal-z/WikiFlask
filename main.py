@@ -131,25 +131,42 @@ def PlotWikiEditors_JINJA():
 def plot_wiki_editors_JINJA():
     try:
         page_title = request.args.get('page_title')
-        page_title = page_title[0].upper() + page_title[1:]
+        #page_title = page_title[0].upper() + page_title[1:]
+        page_title = page_title.title()
 
         try:
+            print("trying")
             timestamps_and_users = urllib.parse.unquote(request.args.get('chart_data'))
             timestamps_and_users = ast.literal_eval(timestamps_and_users)
-
+            print("success!")
         except:
+            print('fail')
             timestamps_and_users = get_revision_timestamps_and_users(page_title)
+            print('done failing')
+
 
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
         num_revisions = len(timestamps)
-        orig_author = timestamps_and_users[-1][0]
+        print('done with timestamp segregation')
 
+        orig_author = timestamps_and_users[-1][0]
         editors = set(item[0] for item in timestamps_and_users)
         num_editors = len(editors)
+        print('done with editors segregation')
 
-        user_freqs = {tup[0]: [item[1] for item in timestamps_and_users if item[0] == tup[0]] for tup in
-                      timestamps_and_users}
+
+        def dictify(some_list=list):
+            result = {}
+            for k, v in some_list:
+                result.setdefault(k, []).append(v)
+            return result
+
+        user_freqs = dictify(timestamps_and_users)
+
+
+
+        print('done calculating freqs')
         user_freqs = dict(sorted(user_freqs.items(), key=lambda x: len(x[1])))
         user_edits_list = user_freqs.items()
         user_edits_list_len = len(user_edits_list)
@@ -159,6 +176,8 @@ def plot_wiki_editors_JINJA():
         colors = ['#348ABD', '#A60628', '#7A68A6', '#467821', '#D55E00', '#CC79A7', '#56B4E9', '#009E73', '#F0E442',
                   '#0072B2']
         user_colors = []
+
+        print("plotting editors")
 
         p = figure(title=page_title,
                    x_axis_label='Time',
@@ -250,7 +269,7 @@ def PlotWikiRevisions_JINJA():
 def plot_wiki_revisions_JINJA():
     try:
         page_title = request.args.get('page_title')
-        page_title = page_title[0].upper() + page_title[1:]
+        page_title = page_title.title()
         title = f'Revisions to the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page Over Time'
 
         try:
@@ -258,7 +277,9 @@ def plot_wiki_revisions_JINJA():
             timestamps_and_users = ast.literal_eval(timestamps_and_users)
 
         except:
+            print(page_title)
             timestamps_and_users = get_revision_timestamps_and_users(page_title)
+
 
         timestamps = [item[1] for item in timestamps_and_users]
         timestamps.reverse()
