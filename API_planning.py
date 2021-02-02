@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import numpy as np
 from flask import Flask, render_template, request, url_for
@@ -64,7 +64,7 @@ class Wiki_Query():
 
 
             revisions = page_info['revisions']
-            print(len(revisions))
+            print("revisions queried:", len(revisions))
             #daily_pageviews_dict = response['query']['pages'][page_id]['pageviews']
             """
             # calculating some stats. Perhaps move all calculations out of the function.
@@ -100,7 +100,7 @@ class Wiki_Query():
 
             #print(page_info.keys())
             revisions += rev_info['revisions']
-            print(len(revisions))
+            print("revisions queried:", len(revisions))
 
             #print(len(revisions))
             #pass
@@ -191,103 +191,79 @@ def dictify(some_list=list):
     return result
 
 
-page_title = 'Barack Obama'
+page_title = 'Joe Biden'
 # page_title = page_title[0].upper() + page_title[1:]
 page_title = page_title.title()
 
 rv_data = Wiki_Query(page_title).revisions_data()
 users_and_timestamps = [(a,b) for a,b in zip(rv_data.rv_users, rv_data.rv_timestamps)]
 
-timestamps = [item[1] for item in users_and_timestamps]
+timestamps = rv_data.rv_timestamps
 timestamps.reverse()
+
 num_revisions = len(timestamps)
-orig_author = users_and_timestamps[-1][0]
 
-editors = set(item[0] for item in users_and_timestamps)
+editors = set(rv_data.rv_users)
 num_editors = len(editors)
+anonymous_edits_count = sum([1 for item in rv_data.revisions if 'anon' in item])
+registered_edits_count = num_revisions - anonymous_edits_count
+orig_author = rv_data.rv_users[-1]
 
-dates = [datetime.strptime(d, '%Y-%m-%dT%H:%M:%SZ').date() for d in timestamps]
-days = sorted(list(set(dates)))
+pageviews = rv_data.revisions_data['pageviews']
+pv_dates = [datetime.strptime(d, '%Y-%m-%d') for d in pageviews.keys()]
+pv_counts = [item for item in pageviews.values() ]
 
-date_freqs = {}
-for date in dates:
-    if not str(date) in date_freqs:
-        date_freqs[str(date)] = 1
-    else:
-        date_freqs[str(date)] += 1
+for c,d in zip(pv_counts,pv_dates):
+    print(type(c), c, d)
+avg_pageviews_60 = np.around(np.average(pv_counts),decimals=2)
 
-date_freqs = [item[1] for item in sorted(date_freqs.items(), key=lambda x: x[0])]
-cum_edits = np.cumsum(date_freqs)
 
-days_str = days
-days = [datetime.combine(day, datetime.min.time()) for day in days]
+print(pv_dates)
+print(pv_counts)
 
-source = ColumnDataSource(data=dict(x_values=days,
-                                    y_values=date_freqs,
-                                    desc=days_str,
-                                    yy_values=[d - 1 for d in date_freqs],
-                                    color=['#0072B2' for d in days],
-                                    color2=['red' for d in days],
-                                    cum_edits=cum_edits,
+
+source = ColumnDataSource(data=dict(days=pv_dates,
+                                    views=pv_counts,
+                                    days_str=[str(d.date()) for d in pv_dates],
+                                    color=['blue' for item in rv_data.revisions_data['pageviews']]
                                     ))
 
-
-def get_width():
-    mindate = min(source.data['x_values'])
-    maxdate = max(source.data['x_values'])
-    return ((maxdate - mindate).total_seconds() * 1000 / len(source.data['x_values']))
 
 
 p1 = figure(title=page_title,
             x_axis_label='Time In Days',
-            y_axis_label='Revisions Per Day',
+            y_axis_label='Views Per Day',
             x_axis_type='datetime',
             tools="pan,wheel_zoom,box_zoom,undo,redo,reset,save")
 
 # add a line renderer for Hovertool tracking.
-p1line = p1.line('x_values', 'y_values', name=page_title, source=source, alpha=0)
+#p1line = p1.line('days', 'views', name=page_title, source=source, alpha=0.)
 # Add vbar for data display
-p1.vbar(x='x_values', width=get_width(), color='color', top='y_values', bottom=0, source=source)
+p1.vbar(x='days', width=timedelta(days=.8), top='views', source=source)
 
 # add an interactive tools to the visual
-p1.add_tools(HoverTool(tooltips=[("Date", "@desc"), ("# Revisions", "@y_values")],
+p1.add_tools(HoverTool(tooltips=[("Date", "@days_str"), ("# views", "@views")],
                        mode='vline',
-                       renderers=[p1line]))
+                       point_policy='follow_mouse'
+                       #renderers=[p1line]
+                       ))
 
 p1.toolbar.logo = None
 
 p1.background_fill_color = "#eeeeee"
 p1.xaxis.axis_line_color = "#bcbcbc"
 p1.yaxis.axis_line_color = "#bcbcbc"
-tab1 = Panel(child=p1, title='Frequency')
-
-p2 = figure(title=page_title,
-            x_axis_label='Time in Days',
-            y_axis_label='Count of Revisions',
-            x_axis_type='datetime',
-            tools="pan,wheel_zoom,box_zoom,reset,save")
-
-# add a line renderer for Hovertool tracking.
-p2line = p2.line('x_values', 'cum_edits', alpha=0, source=source)
-# Add vbar for data display
-p2.vbar(x='x_values', width=get_width(), color='color', top='cum_edits', bottom=0, source=source)
-
-# add some interactive tools to the visual
-p2.add_tools(HoverTool(tooltips=[("Date", "@desc"), ("# Revisions", "@cum_edits")],
-                       mode='vline',
-                       renderers=[p2line]))
-
-p2.toolbar.logo = None
-
-p2.background_fill_color = "#eeeeee"
-p2.xaxis.axis_line_color = "#bcbcbc"
-p2.yaxis.axis_line_color = "#bcbcbc"
-
-tab2 = Panel(child=p2, title='Cumulative')
-
-tabs = Tabs(tabs=[tab1, tab2])
+p1.left[0].formatter.use_scientific = False
 
 
 output_file('APItest.html')
 
-show(tabs)
+show(p1)
+
+
+
+
+print("Total anonymous edits:", anonymous_edits_count)
+print("Total registered edits:", registered_edits_count)
+print("daily average pageviews (last 60 days):", avg_pageviews_60)
+
