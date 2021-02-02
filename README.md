@@ -46,6 +46,9 @@ Webapp tools for building Wikipedia literacy. Built with Flask, Jinja2, Bokeh, a
 ###### WMF Analytics APIs
 - https://wikitech.wikimedia.org/wiki/Analytics_Engineering#Datasets
 
+
+##### Sticking with Action for now, but may consider REST for profile pages.
+- Analytics API may be useful for a rich pageviews experience.
+
 ###### Bokeh User Guide
 - https://docs.bokeh.org/en/latest/docs/user_guide.html
-
