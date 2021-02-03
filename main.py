@@ -384,7 +384,6 @@ def plot_wiki_revisions_JINJA():
                                chart_data=chart_data)
 
     except:
-        print(len(page_title))
         if len(page_title) == 0:
             num_revisions = ''
             num_editors = ''
