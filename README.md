@@ -16,6 +16,8 @@ Webapp tools for building Wikipedia literacy. Built with Flask, Jinja2, Bokeh, a
   -[x] have it return a JSON instead of a tuple
   -[x] have it take rvprops as a list      
   -[x] have it  return more page info (pageviews, other stuff...)
+  - Add start and end date parameters to revisions_data method. 
+    - Note: Will need to be checked inside of function. Wikipedia only offers single-page support for dates with Action API.
 
 - Pass data in url instead of re-querying Wikipedia:
   -[x] Pass existing users_and_timestamps variable
@@ -26,6 +28,7 @@ Webapp tools for building Wikipedia literacy. Built with Flask, Jinja2, Bokeh, a
 - Add avg. pageviews (last 60 days)
   - create new route for plot
   -[x] Design Bokeh plot for pageviews
+    - Add avg line.
 - add percent of anonymous user edits
 
 

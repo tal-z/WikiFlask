@@ -191,7 +191,7 @@ def dictify(some_list=list):
     return result
 
 
-page_title = 'Joe Biden'
+page_title = 'Robinhood (company)'
 # page_title = page_title[0].upper() + page_title[1:]
 page_title = page_title.title()
 
@@ -225,7 +225,7 @@ print(pv_counts)
 source = ColumnDataSource(data=dict(days=pv_dates,
                                     views=pv_counts,
                                     days_str=[str(d.date()) for d in pv_dates],
-                                    color=['blue' for item in rv_data.revisions_data['pageviews']]
+                                    color=['#0072B2' for item in rv_data.revisions_data['pageviews']]
                                     ))
 
 

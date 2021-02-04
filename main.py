@@ -12,8 +12,6 @@ import ast
 
 
 
-
-
 def dictify(some_list=list):
     result = {}
     for k, v in some_list:
@@ -121,8 +119,6 @@ def has_no_empty_params(rule):
     return len(defaults) >= len(arguments)
 
 app = Flask(__name__)
-
-
 
 
 @app.route("/")
@@ -268,7 +264,6 @@ def PlotWikiRevisions_JINJA():
                            title=title,
                            num_revisions=num_revisions,
                            num_editors=num_editors)
-
 
 @app.route('/plot_wiki_revisions_JINJA')
 def plot_wiki_revisions_JINJA():
