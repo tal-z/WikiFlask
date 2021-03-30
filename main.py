@@ -135,7 +135,6 @@ def Index():
     return render_template('site-map.html', links=links)
     # links is now a list of url, endpoint tuples
 
-
 @app.route('/PlotWikiEditors_JINJA')
 def PlotWikiEditors_JINJA():
     num_revisions = ''
@@ -148,7 +147,6 @@ def PlotWikiEditors_JINJA():
                            title=title,
                            num_revisions=num_revisions,
                            num_editors=num_editors)
-
 
 @app.route('/plot_wiki_editors_JINJA')
 def plot_wiki_editors_JINJA():
@@ -251,7 +249,6 @@ def plot_wiki_editors_JINJA():
                                    title=title,
                                    num_revisions=num_revisions,
                                    num_editors=num_editors)
-
 
 @app.route('/PlotWikiRevisions_JINJA')
 def PlotWikiRevisions_JINJA():
