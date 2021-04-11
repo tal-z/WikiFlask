@@ -1,7 +1,7 @@
 from datetime import datetime
 import requests
 import numpy as np
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, session
 from bokeh.plotting import figure
 from bokeh.embed import file_html
 from bokeh.resources import CDN
@@ -152,7 +152,6 @@ def PlotWikiEditors_JINJA():
 def plot_wiki_editors_JINJA():
     try:
         page_title = request.args.get('page_title')
-        #page_title = page_title[0].upper() + page_title[1:]
         page_title = page_title.title()
 
         try:
@@ -213,7 +212,7 @@ def plot_wiki_editors_JINJA():
 
         html = file_html(p, CDN, "my plot")
         title = f'Editors of the "<a href="https://en.wikipedia.org/wiki/{page_title}">{page_title}</a>" Wikipedia Page (Top 10)'
-        chart_data = urllib.parse.urlencode({'chart_data':users_and_timestamps})
+        chart_data = urllib.parse.urlencode({'chart_data': users_and_timestamps})
         return render_template('PlotWikiEditors_JINJA.html',
                                html=html,
                                user_colors=reversed(users_colors),
@@ -276,6 +275,7 @@ def plot_wiki_revisions_JINJA():
         except:
             rv_data = Wiki_Query(page_title).revisions_data()
             users_and_timestamps = [(a, b) for a, b in zip(rv_data.rv_users, rv_data.rv_timestamps)]
+
 
         timestamps = [item[1] for item in users_and_timestamps]
         timestamps.reverse()
@@ -365,6 +365,7 @@ def plot_wiki_revisions_JINJA():
         tabs = Tabs(tabs=[tab1, tab2])
 
         html = file_html(tabs, CDN, page_title)
+
         chart_data = urllib.parse.urlencode({'chart_data':users_and_timestamps})
         return render_template('PlotWikiRevisions_JINJA.html',
                                html=html,
