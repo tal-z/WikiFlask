@@ -9,8 +9,14 @@ from bokeh.models import LassoSelectTool, HoverTool, ColumnDataSource
 from bokeh.models.widgets import Panel, Tabs
 import urllib.parse
 import ast
+import hmac
+import hashlib
+import os
 
-
+try:
+    from pip._internal.vcs import git
+except:
+    import git
 
 def dictify(some_list=list):
     result = {}
@@ -112,6 +118,14 @@ class Wiki_Query():
     #def revisions_content(self, props='revisions|pageviews|info', rvprops='user|timestamp|size|content', inprops='protection|watchers', **kwargs):
 
 
+def is_valid_signature(x_hub_signature, data, private_key):
+    # x_hub_signature and data are from the webhook payload
+    # private key is your webhook secret
+    hash_algorithm, github_signature = x_hub_signature.split('=', 1)
+    algorithm = hashlib.__dict__.get(hash_algorithm)
+    encoded_key = bytes(private_key, 'latin-1')
+    mac = hmac.new(encoded_key, msg=data, digestmod=algorithm)
+    return hmac.compare_digest(mac.hexdigest(), github_signature)
 
 def has_no_empty_params(rule):
     defaults = rule.defaults if rule.defaults is not None else ()
@@ -120,6 +134,22 @@ def has_no_empty_params(rule):
 
 app = Flask(__name__)
 
+
+
+@app.route('/update_server', methods=['POST'])
+def webhook():
+    if request.method == 'POST':
+        github_secret_token = os.getenv('github_secret_token')
+        x_hub_signature = request.headers.get('X-Hub-Signature')
+        if is_valid_signature(x_hub_signature, request.data, github_secret_token):
+            repo = git.Repo('WikiTools/WikiTools')
+            origin = repo.remotes.origin
+            origin.pull()
+            return ('Updated PythonAnywhere successfully', 200)
+        else:
+            return ('Signature not validated', 400)
+    else:
+        return ('Wrong event type', 400)
 
 @app.route("/")
 def Index():
