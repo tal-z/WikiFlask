@@ -19,7 +19,7 @@ except:
 
 
 
-"""TEST!!! Here we go!"""
+""" 8) """
 
 def dictify(some_list=list):
     result = {}
