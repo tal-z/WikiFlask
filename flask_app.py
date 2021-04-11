@@ -13,10 +13,9 @@ import hmac
 import hashlib
 import os
 try:
-    from pip._internal.vcs import git
-except:
     import git
-
+except:
+    from pip._internal.vcs import git
 
 
 """ 8) """
