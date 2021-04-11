@@ -144,7 +144,7 @@ def webhook():
         github_secret_token = os.getenv('github_secret_token')
         x_hub_signature = request.headers.get('X-Hub-Signature')
         if is_valid_signature(x_hub_signature, request.data, github_secret_token):
-            repo = git.Repo('WikiTools/WikiTools')
+            repo = git.Repo('WikiTools')
             origin = repo.remotes.origin
             origin.pull()
             return ('Updated PythonAnywhere successfully', 200)
