@@ -18,7 +18,7 @@ except:
     from pip._internal.vcs import git
 
 
-""" 8^) """
+""" 8^( """
 
 def dictify(some_list=list):
     result = {}
